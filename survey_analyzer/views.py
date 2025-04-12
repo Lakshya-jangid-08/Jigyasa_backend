@@ -310,7 +310,7 @@ class PublishAnalysisView(APIView):
                 <p><strong>Date:</strong> {analysis.date}</p>
                 <p>{analysis.description}</p>
                 <h2>Plots</h2>
-                {''.join([f'<div><h3>{plot.get('title', 'Untitled')}</h3><p>{plot.get('description', '')}</p></div>' for plot in analysis.plots])}
+                {(''.join([f'<div><h3>{plot.get("title", "Untitled")}</h3><p>{plot.get("description", "")}</p></div>' for plot in analysis.plots]))}
             </body>
             </html>
             """
