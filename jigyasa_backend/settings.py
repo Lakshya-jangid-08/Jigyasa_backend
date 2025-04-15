@@ -25,7 +25,11 @@ SECRET_KEY = 'django-insecure-l=o@m)ka7(0!5c)(ee$a7gyp=uxuhkex8wz-e3^r*)n=3+4zka
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'jigyasa-backend.onrender.com',  # Add your domain here
+    'localhost',
+    '127.0.0.1',
+]
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_ALL_ORIGINS = True
 
