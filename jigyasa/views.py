@@ -103,6 +103,24 @@ class SurveyViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(creator=self.request.user)
 
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.creator != request.user and not request.user.is_staff:
+            return Response(
+                {"detail": "You do not have permission to edit this survey."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        return super().update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.creator != request.user and not request.user.is_staff:
+            return Response(
+                {"detail": "You do not have permission to edit this survey."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        return super().partial_update(request, *args, **kwargs)
+
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         # Get questions with choices
@@ -207,6 +225,41 @@ class SurveyResponseViewSet(viewsets.ModelViewSet):
             
             # Ensure answers are properly linked to the survey
             answers_data = request.data.pop('answers', [])
+            
+            # Validate required questions
+            required_questions = Question.objects.filter(survey=survey, required=True)
+            answered_question_ids = [answer.get('question') for answer in answers_data]
+            
+            missing_required_questions = required_questions.exclude(id__in=answered_question_ids)
+            if missing_required_questions.exists():
+                errors = {}
+                for question in missing_required_questions:
+                    errors[f"question_{question.id}"] = "This field is required"
+                return Response(
+                    errors,
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Validate answer content
+            for answer_data in answers_data:
+                question_id = answer_data.get('question')
+                question = Question.objects.get(id=question_id, survey=survey)
+                
+                if question.required:
+                    if question.question_type == 'text':
+                        if not answer_data.get('text_answer', '').strip():
+                            return Response(
+                                {f"question_{question.id}": "Please provide an answer"},
+                                status=status.HTTP_400_BAD_REQUEST
+                            )
+                    elif question.question_type in ['multiple_choice', 'single_choice']:
+                        selected_choices = answer_data.get('selected_choices', [])
+                        if not selected_choices:
+                            return Response(
+                                {f"question_{question.id}": "Please select at least one choice"},
+                                status=status.HTTP_400_BAD_REQUEST
+                            )
+            
             response = SurveyResponse.objects.create(survey=survey, respondent=request.user)
             
             for answer_data in answers_data:
@@ -221,15 +274,7 @@ class SurveyResponseViewSet(viewsets.ModelViewSet):
                     text_answer=text_answer
                 )
                 if selected_choices:
-                    # Log selected choices for debugging
-                    print(f"Selected Choices for Question {question_id}: {selected_choices}")
                     answer.selected_choices.set(selected_choices)
-            
-            print("Survey response data:", {
-                "survey": response.survey.id,
-                "respondent": response.respondent.id if response.respondent else None,
-                "answers": answers_data
-            })
             
             return Response({"detail": "Response submitted successfully"}, status=status.HTTP_201_CREATED)
             

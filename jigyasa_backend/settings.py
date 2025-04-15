@@ -14,12 +14,6 @@ from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-import os
-
-ALLOWED_HOSTS = ['.onrender.com']
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [BASE_DIR / "static"]
 
 
 # Quick-start development settings - unsuitable for production
@@ -31,7 +25,7 @@ SECRET_KEY = 'django-insecure-l=o@m)ka7(0!5c)(ee$a7gyp=uxuhkex8wz-e3^r*)n=3+4zka
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = []
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_ALL_ORIGINS = True
 
@@ -73,15 +67,11 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
-
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 ROOT_URLCONF = 'jigyasa_backend.urls'
 

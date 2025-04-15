@@ -95,6 +95,19 @@ class SurveySerializer(serializers.ModelSerializer):
         instance.description = validated_data.get('description', instance.description)
         instance.is_active = validated_data.get('is_active', instance.is_active)
         instance.requires_organization = validated_data.get('requires_organization', instance.requires_organization)
+        
+        # Update organization if provided
+        if 'organization' in validated_data:
+            instance.organization = validated_data.get('organization')
+        elif instance.requires_organization and not instance.organization:
+            raise serializers.ValidationError({
+                'organization_id': 'Organization is required when organization access is required.'
+            })
+        
+        # If requires_organization is being set to false, clear the organization
+        if not instance.requires_organization:
+            instance.organization = None
+        
         instance.save()
 
         # Handle questions update
