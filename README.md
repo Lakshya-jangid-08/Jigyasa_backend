@@ -1,1 +1,1 @@
-Jigyasa Backend
+Jigyasa App Backend
